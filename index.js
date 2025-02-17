@@ -1,16 +1,16 @@
 const express = require('express');
-const app = express();
-const port = 3000;
 
-// Middleware to parse JSON bodies
+const app = express();
+const port = process.env.PORT || 3000; // Use Vercel's port
+
 app.use(express.json());
 
-// Root route to test the server
+// ✅ Default Route
 app.get('/', (req, res) => {
-  res.send('Welcome to the Student API');
+  res.send('Welcome to the Student API - Deployed on Vercel');
 });
 
-// Sample data (Initially a single student entry)
+// Sample data
 let students = [
   {
     "id": "1",
@@ -45,52 +45,31 @@ let students = [
   }
 ];
 
-// CREATE: Add a new student
+// ✅ CRUD Routes
+app.get('/students', (req, res) => res.json(students));
+app.get('/students/:id', (req, res) => {
+  const student = students.find(s => s.id === req.params.id);
+  student ? res.json(student) : res.status(404).json({ message: 'Student not found' });
+});
 app.post('/students', (req, res) => {
   const newStudent = req.body;
-  newStudent.id = (students.length + 1).toString(); // Assign a new ID
+  newStudent.id = (students.length + 1).toString();
   students.push(newStudent);
   res.status(201).json(newStudent);
 });
-
-// READ: Get all students
-app.get('/students', (req, res) => {
-  res.status(200).json(students);
-});
-
-// READ: Get a single student by ID
-app.get('/students/:id', (req, res) => {
-  const student = students.find(s => s.id === req.params.id);
-  if (student) {
-    res.status(200).json(student);
-  } else {
-    res.status(404).json({ message: 'Student not found' });
-  }
-});
-
-// UPDATE: Update a student's details by ID
 app.put('/students/:id', (req, res) => {
   const student = students.find(s => s.id === req.params.id);
   if (student) {
-    Object.assign(student, req.body); // Update the student with new data
-    res.status(200).json(student);
+    Object.assign(student, req.body);
+    res.json(student);
   } else {
     res.status(404).json({ message: 'Student not found' });
   }
 });
-
-// DELETE: Delete a student by ID
 app.delete('/students/:id', (req, res) => {
-  const studentIndex = students.findIndex(s => s.id === req.params.id);
-  if (studentIndex !== -1) {
-    students.splice(studentIndex, 1); // Remove the student from the array
-    res.status(200).json({ message: 'Student deleted successfully' });
-  } else {
-    res.status(404).json({ message: 'Student not found' });
-  }
+  students = students.filter(s => s.id !== req.params.id);
+  res.json({ message: 'Student deleted successfully' });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+// ✅ Export for Vercel
+module.exports = app;
