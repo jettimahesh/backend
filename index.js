@@ -5,6 +5,11 @@ const port = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Root route to test the server
+app.get('/', (req, res) => {
+  res.send('Welcome to the Student API');
+});
+
 // Sample data (Initially a single student entry)
 let students = [
   {
